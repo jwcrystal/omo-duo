@@ -307,24 +307,27 @@ print_success "已創建 opencode-slim"
 # Step 5: 更新 PATH
 print_step "檢查 PATH 設定..."
 
-if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-    # 檢測 shell
-    SHELL_RC=""
-    if [ -n "$ZSH_VERSION" ]; then
-        SHELL_RC="$HOME/.zshrc"
-    elif [ -n "$BASH_VERSION" ]; then
-        SHELL_RC="$HOME/.bashrc"
-    fi
-    
-    if [ -n "$SHELL_RC" ]; then
+# 檢測 shell
+SHELL_RC=""
+if [ -n "$ZSH_VERSION" ]; then
+    SHELL_RC="$HOME/.zshrc"
+elif [ -n "$BASH_VERSION" ]; then
+    SHELL_RC="$HOME/.bashrc"
+fi
+
+if [ -n "$SHELL_RC" ]; then
+    # 檢查 shell rc 文件中是否已有 opencode-dual-version 的 PATH 設定
+    if ! grep -q 'opencode-dual-version setup' "$SHELL_RC" 2>/dev/null; then
         echo "" >> "$SHELL_RC"
         echo "# Added by opencode-dual-version setup" >> "$SHELL_RC"
         echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$SHELL_RC"
         print_success "已將 ~/.local/bin 加入 $SHELL_RC"
         print_info "請執行: source $SHELL_RC"
+    else
+        print_success "~/.local/bin 已在 $SHELL_RC 中設定"
     fi
 else
-    print_success "~/.local/bin 已在 PATH 中"
+    print_info "無法檢測 shell，請手動將 ~/.local/bin 加入 PATH"
 fi
 
 # Step 6: 安裝 opencode-notifier
@@ -367,9 +370,13 @@ echo ""
 echo "  Full:  ~/.config/opencode/oh-my-opencode.json"
 echo "  Slim:  ~/.config/opencode/oh-my-opencode-slim.json"
 echo ""
-if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-    echo -e "${YELLOW}⚠ 請執行以下指令使 PATH 生效:${NC}"
-    echo ""
-    echo "  source ~/.zshrc"
-    echo ""
+
+# 檢查是否需要提示用戶 source
+if [ -n "$SHELL_RC" ]; then
+    if grep -q 'opencode-dual-version setup' "$SHELL_RC" 2>/dev/null; then
+        echo -e "${YELLOW}⚠ 請執行以下指令使 PATH 生效:${NC}"
+        echo ""
+        echo "  source $SHELL_RC"
+        echo ""
+    fi
 fi

@@ -11,3 +11,5 @@
 # Temporary
 *.tmp
 *.log
+HANDOFF-*.md
+.spec-workflow/
