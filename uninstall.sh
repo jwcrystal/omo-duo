@@ -7,6 +7,16 @@
 set -e
 
 # ============================================
+# 處理中斷信號 - 優雅退出不報錯
+# ============================================
+cleanup() {
+    echo ""
+    echo -e "${YELLOW}已取消卸載${NC}"
+    exit 0
+}
+trap cleanup SIGINT SIGTERM
+
+# ============================================
 # 顏色定義
 # ============================================
 RED='\033[0;31m'
@@ -39,6 +49,28 @@ print_info() {
 }
 
 # ============================================
+# 安全讀取函數 - 處理中斷和空輸入
+# ============================================
+safe_read() {
+    local prompt="$1"
+    local default="$2"
+    local var_name="$3"
+    
+    echo -en "${YELLOW}$prompt${NC}"
+    read -r input || {
+        eval "$var_name='$default'"
+        echo ""
+        return 0
+    }
+    
+    if [ -z "$input" ]; then
+        eval "$var_name='$default'"
+    else
+        eval "$var_name='$input'"
+    fi
+}
+
+# ============================================
 # 主程式
 # ============================================
 print_header "OpenCode Dual Version Uninstall"
@@ -66,7 +98,7 @@ fi
 print_step "移除 Slim 配置..."
 
 if [ -f "$CONFIG_DIR/oh-my-opencode-slim.json" ]; then
-    read -p "  是否移除 oh-my-opencode-slim.json？(y/N): " remove_slim
+    safe_read "是否移除 oh-my-opencode-slim.json？(y/N): " "n" remove_slim
     if [[ "$remove_slim" =~ ^[Yy]$ ]]; then
         rm -f "$CONFIG_DIR/oh-my-opencode-slim.json"
         print_success "已移除 oh-my-opencode-slim.json"
@@ -81,7 +113,7 @@ fi
 print_step "移除 Full 備份..."
 
 if [ -f "$CONFIG_DIR/oh-my-opencode-full.json" ]; then
-    read -p "  是否移除 oh-my-opencode-full.json 備份？(y/N): " remove_backup
+    safe_read "是否移除 oh-my-opencode-full.json 備份？(y/N): " "n" remove_backup
     if [[ "$remove_backup" =~ ^[Yy]$ ]]; then
         rm -f "$CONFIG_DIR/oh-my-opencode-full.json"
         print_success "已移除 oh-my-opencode-full.json"
@@ -95,7 +127,7 @@ fi
 # Step 4: 恢復原始配置
 print_step "恢復原始配置..."
 
-read -p "  是否將 opencode.json 恢復為 Full 版？(Y/n): " restore_full
+safe_read "是否將 opencode.json 恢復為 Full 版？(Y/n): " "y" restore_full
 if [[ ! "$restore_full" =~ ^[Nn]$ ]]; then
     if command -v jq &> /dev/null; then
         tmp_file=$(mktemp)
@@ -113,11 +145,9 @@ print_step "檢查 PATH 設定..."
 
 if [ -f "$HOME/.zshrc" ]; then
     if grep -q 'export PATH="\$HOME/.local/bin:\$PATH"' "$HOME/.zshrc" 2>/dev/null; then
-        read -p "  是否從 ~/.zshrc 移除 PATH 設定？(y/N): " remove_path
+        safe_read "是否從 ~/.zshrc 移除 PATH 設定？(y/N): " "n" remove_path
         if [[ "$remove_path" =~ ^[Yy]$ ]]; then
-            # 備份
             cp "$HOME/.zshrc" "$HOME/.zshrc.backup.$(date +%Y%m%d%H%M%S)"
-            # 移除相關行
             sed -i '' '/# Added by opencode-dual-version setup/d' "$HOME/.zshrc"
             sed -i '' '/export PATH="\$HOME\/.local\/bin:\$PATH"/d' "$HOME/.zshrc"
             print_success "已從 ~/.zshrc 移除 PATH 設定"
