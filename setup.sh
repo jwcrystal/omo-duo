@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# OpenCode Dual Version Setup Script
+# omo-duo Setup Script
 # 同時安裝 oh-my-opencode (Full) 和 oh-my-opencode-slim (Slim)
 #
 # 使用方式: ./setup.sh [選項]
@@ -90,7 +90,7 @@ for arg in "$@"; do
         --antigravity=*) ANTIGRAVITY="${arg#*=}" ;;
         --chutes=*) CHUTES="${arg#*=}" ;;
         --help)
-            echo "OpenCode Dual Version Setup Script"
+            echo "omo-duo Setup Script"
             echo ""
             echo "使用方式: ./setup.sh [選項]"
             echo ""
@@ -144,7 +144,7 @@ print_info() {
 # ============================================
 # 主程式
 # ============================================
-print_header "OpenCode Dual Version Setup"
+print_header "omo-duo Setup"
 echo ""
 
 # Step 0: 檢查前置需求
@@ -307,19 +307,18 @@ print_success "已創建 opencode-slim"
 # Step 5: 更新 PATH
 print_step "檢查 PATH 設定..."
 
-# 檢測 shell
+# 檢測用戶預設 shell（使用 $SHELL 而不是當前執行環境）
 SHELL_RC=""
-if [ -n "$ZSH_VERSION" ]; then
+if [[ "$SHELL" == *"/zsh"* ]]; then
     SHELL_RC="$HOME/.zshrc"
-elif [ -n "$BASH_VERSION" ]; then
+elif [[ "$SHELL" == *"/bash"* ]]; then
     SHELL_RC="$HOME/.bashrc"
 fi
-
 if [ -n "$SHELL_RC" ]; then
-    # 檢查 shell rc 文件中是否已有 opencode-dual-version 的 PATH 設定
-    if ! grep -q 'opencode-dual-version setup' "$SHELL_RC" 2>/dev/null; then
+    # 檢查 shell rc 文件中是否已有 omo-duo 的 PATH 設定
+    if ! grep -q 'omo-duo setup' "$SHELL_RC" 2>/dev/null; then
         echo "" >> "$SHELL_RC"
-        echo "# Added by opencode-dual-version setup" >> "$SHELL_RC"
+        echo "# Added by omo-duo setup" >> "$SHELL_RC"
         echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$SHELL_RC"
         print_success "已將 ~/.local/bin 加入 $SHELL_RC"
         print_info "請執行: source $SHELL_RC"
@@ -327,7 +326,7 @@ if [ -n "$SHELL_RC" ]; then
         print_success "~/.local/bin 已在 $SHELL_RC 中設定"
     fi
 else
-    print_info "無法檢測 shell，請手動將 ~/.local/bin 加入 PATH"
+    print_info "無法檢測 shell ($SHELL)，請手動將 ~/.local/bin 加入 PATH"
 fi
 
 # Step 6: 安裝 opencode-notifier
@@ -373,7 +372,7 @@ echo ""
 
 # 檢查是否需要提示用戶 source
 if [ -n "$SHELL_RC" ]; then
-    if grep -q 'opencode-dual-version setup' "$SHELL_RC" 2>/dev/null; then
+    if grep -q 'omo-duo setup' "$SHELL_RC" 2>/dev/null; then
         echo -e "${YELLOW}⚠ 請執行以下指令使 PATH 生效:${NC}"
         echo ""
         echo "  source $SHELL_RC"

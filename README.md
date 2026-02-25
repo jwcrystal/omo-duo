@@ -1,4 +1,4 @@
-# OpenCode Dual Version - Full & Slim 並行使用
+# omo-duo - Full & Slim 並行使用
 
 讓你同時使用 [oh-my-opencode](https://github.com/samwang-design/oh-my-opencode) (Full) 和 [oh-my-opencode-slim](https://github.com/alvinunreal/oh-my-opencode-slim) (Slim) 兩個版本。
 
@@ -10,10 +10,9 @@ opencode-slim  # 精簡版 - 省更多 token，適合日常開發
 ## 特色
 
 - ✅ 一鍵切換 Full / Slim 版本
-- ✅ 保留所有共用 plugins（notifier, envsitter 等）
+- ✅ 保留所有共用 plugins（envsitter 等）
 - ✅ 兩個版本的 agent 配置獨立，可各自調整模型
-- ✅ 支援自動更新（plugin 不鎖定版號）
-- ✅ 內建 opencode-notifier 配置
+- ✅ 內建 opencode-notifier 支援（見 [官方文檔](https://github.com/Mohak34/opencode-notifier)）
 
 ## 前置需求
 
@@ -25,8 +24,8 @@ opencode-slim  # 精簡版 - 省更多 token，適合日常開發
 
 ```bash
 # 克隆或下載此專案
-git clone https://github.com/your-username/opencode-dual-version.git
-cd opencode-dual-version
+git clone https://github.com/jwcrystal/omo-duo.git
+cd omo-duo
 
 # 執行安裝腳本
 ./setup.sh
@@ -88,10 +87,14 @@ chmod +x ~/.local/bin/opencode-slim
 ```
 
 ### Step 4: 更新 PATH
-
+根據你的 shell 選擇對應的設定檔：
 ```bash
+# zsh (macOS 預設)
 echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
 source ~/.zshrc
+# bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
 ```
 
 ### Step 5: 安裝 opencode-notifier (可選)
@@ -105,6 +108,8 @@ jq '(.plugin // []) | . + ["@mohak34/opencode-notifier"] | unique' \
   ~/.config/opencode/opencode.json > /tmp/opencode.json && \
   mv /tmp/opencode.json ~/.config/opencode/opencode.json
 ```
+
+> 📖 完整配置說明請參考 [opencode-notifier 官方文檔](https://github.com/Mohak34/opencode-notifier)
 
 ## 使用方式
 
@@ -151,28 +156,6 @@ vim ~/.config/opencode/oh-my-opencode.json
 # 編輯 Slim 版配置
 vim ~/.config/opencode/oh-my-opencode-slim.json
 ```
-
-## opencode-notifier 配置
-
-`opencode-notifier.json` 定義通知行為：
-
-```json
-{
-  "sound": true,
-  "notification": true,
-  "events": {
-    "permission": { "sound": true, "notification": true },
-    "complete": { "sound": true, "notification": true },
-    "error": { "sound": true, "notification": true },
-    "question": { "sound": true, "notification": true }
-  }
-}
-```
-
-可調整項目：
-- `sound` - 是否播放音效
-- `notification` - 是否顯示系統通知
-- `events.*` - 各事件類型的通知設定
 
 ## 版本差異
 
@@ -222,6 +205,20 @@ bunx oh-my-opencode-slim@latest install  # 更新 Slim
 OpenCode 的 Skills 位於 `~/.config/opencode/skills/`，不是 `~/.agents/skills/`。
 
 如果你使用 `npx skills install` 安裝 skills，它會安裝到 `~/.agents/skills/`，但 OpenCode 不會讀取該目錄。請使用 OpenCode 內建的 skills 機制。
+
+### Q: 執行 opencode-full/opencode-slim 顯示 command not found？
+
+這表示 PATH 設定尚未生效，請執行：
+
+```bash
+# zsh
+source ~/.zshrc
+
+# bash
+source ~/.bashrc
+```
+
+或者開啟新的終端機視窗。
 
 ## 授權
 
